@@ -3,7 +3,7 @@ export const callGemini = async (
   subject,
   problem,
   generateSlides,
-  generateReport
+  generateReport,
 ) => {
   if (!apiKey || !subject || !problem) {
     throw new Error("Missing required fields");
@@ -55,7 +55,7 @@ export const callGemini = async (
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -65,7 +65,7 @@ export const callGemini = async (
             responseMimeType: "application/json",
           },
         }),
-      }
+      },
     );
 
     if (!response.ok) {
