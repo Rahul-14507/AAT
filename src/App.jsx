@@ -3,7 +3,7 @@ import { GraduationCap, Sparkles } from "lucide-react";
 import InputSection from "./components/InputSection";
 import ResultsSection from "./components/ResultsSection";
 import ThemeToggle from "./components/ThemeToggle";
-import { callGemini } from "./services/gemini";
+import { callGemini, listModels } from "./services/gemini";
 import { generatePPT, generateWordDoc } from "./services/pptGenerator";
 
 function App() {
@@ -57,14 +57,14 @@ function App() {
         subject,
         problem,
         generateSlides,
-        generateReport
+        generateReport,
       );
 
       setProgress("Structuring slides and report...");
       setGeneratedData(data);
     } catch (err) {
       setError(
-        err.message || "Failed to generate content. Please check your API key."
+        err.message || "Failed to generate content. Please check your API key.",
       );
     } finally {
       setLoading(false);
@@ -138,6 +138,33 @@ function App() {
               20 Marks Guaranteed*
             </div>
             <ThemeToggle darkMode={darkMode} onToggle={toggleTheme} />
+          </div>
+          <div className="flex gap-2 mt-4 md:mt-0">
+            <button
+              onClick={async () => {
+                if (!apiKey) {
+                  alert("Please enter an API key first");
+                  return;
+                }
+                try {
+                  const models = await listModels(apiKey);
+                  console.log("AVAILABLE MODELS:", models);
+                  const names = models
+                    .map((m) => m.name.replace("models/", ""))
+                    .join("\n");
+                  alert(
+                    "Available Models:\n" +
+                      names +
+                      "\n\n(See Console for details)",
+                  );
+                } catch (err) {
+                  alert("Error listing models: " + err.message);
+                }
+              }}
+              className="text-xs px-3 py-1 bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+            >
+              Debug Models
+            </button>
           </div>
         </div>
       </header>
