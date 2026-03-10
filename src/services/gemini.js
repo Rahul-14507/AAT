@@ -54,9 +54,10 @@ export const callGemini = async (
   `;
 
   const modelsToTry = [
-    "gemini-1.5-flash",
-    "gemini-1.5-flash-latest",
-    "gemini-pro",
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-flash-latest",
+    "gemini-pro-latest",
   ];
 
   let lastError = null;
@@ -121,29 +122,4 @@ export const callGemini = async (
     lastError,
   );
   throw lastError;
-};
-
-export const listModels = async (apiKey) => {
-  if (!apiKey) throw new Error("API Key is required");
-
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      },
-    );
-
-    if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.error?.message || "API Error");
-    }
-
-    const data = await response.json();
-    return data.models || [];
-  } catch (err) {
-    console.error("ListModels Error:", err);
-    throw err;
-  }
 };
