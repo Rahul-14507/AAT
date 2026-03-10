@@ -53,40 +53,72 @@ export const callGemini = async (
     }
   `;
 
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-          },
-        }),
-      },
-    );
+  const modelsToTry = [
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-latest",
+    "gemini-pro",
+  ];
 
-    if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.error?.message || "API Error");
-    }
+  let lastError = null;
 
-    const data = await response.json();
-    const textResponse = data.candidates[0].content.parts[0].text;
-
-    let parsedData;
+  for (const model of modelsToTry) {
     try {
-      parsedData = JSON.parse(textResponse);
-    } catch (e) {
-      const cleaned = textResponse.replace(/```json/g, "").replace(/```/g, "");
-      parsedData = JSON.parse(cleaned);
-    }
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseMimeType: "application/json",
+            },
+          }),
+        },
+      );
 
-    return parsedData;
-  } catch (err) {
-    console.error("Gemini API Error:", err);
-    throw err;
+      if (!response.ok) {
+        const errData = await response.json();
+        const errorMessage = errData.error?.message || "API Error";
+
+        // If the model is not found/supported, try the next one
+        if (response.status === 404 && errorMessage.includes("not found")) {
+          lastError = new Error(errorMessage);
+          console.warn(`Model ${model} failed, trying next...`);
+          continue;
+        }
+
+        // For other errors (like auth), throw immediately
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      const textResponse = data.candidates[0].content.parts[0].text;
+
+      let parsedData;
+      try {
+        parsedData = JSON.parse(textResponse);
+      } catch (e) {
+        const cleaned = textResponse
+          .replace(/```json/g, "")
+          .replace(/```/g, "");
+        parsedData = JSON.parse(cleaned);
+      }
+
+      return parsedData;
+    } catch (err) {
+      lastError = err;
+      // If it's not a model not found error, don't keep trying
+      if (!err.message.includes("not found")) {
+        throw err;
+      }
+    }
   }
+
+  // If we exhausted all models
+  console.error(
+    "Gemini API Error: exhausted all models. Last error:",
+    lastError,
+  );
+  throw lastError;
 };
