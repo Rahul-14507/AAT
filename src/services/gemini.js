@@ -122,3 +122,28 @@ export const callGemini = async (
   );
   throw lastError;
 };
+
+export const listModels = async (apiKey) => {
+  if (!apiKey) throw new Error("API Key is required");
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.error?.message || "API Error");
+    }
+
+    const data = await response.json();
+    return data.models || [];
+  } catch (err) {
+    console.error("ListModels Error:", err);
+    throw err;
+  }
+};
