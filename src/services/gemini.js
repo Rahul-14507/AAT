@@ -4,6 +4,7 @@ export const callGemini = async (
   problem,
   generateSlides,
   generateReport,
+  slideCount,
 ) => {
   if (!apiKey || !subject || !problem) {
     throw new Error("Missing required fields");
@@ -14,14 +15,14 @@ export const callGemini = async (
 
   if (generateSlides) {
     taskDescription += `
-    2. **Slides:** Generate exactly 20 slides. For each slide, provide:
+    2. **Slides:** Generate exactly ${slideCount} slides. For each slide, provide:
        - "title": A professional slide title.
        - "content": An array of 3-4 detailed and elaborate bullet points explaining the concepts in depth.
        - "speakerNotes": "" (Leave empty as per user request).`;
     jsonStructure += `
         "slides": [
             { "title": "...", "content": ["..."], "speakerNotes": "" },
-            ... (20 items)
+            ... (${slideCount} items)
         ],`;
   }
 
@@ -44,8 +45,10 @@ export const callGemini = async (
     **Constraints & Requirements:**
     1. **Output Format:** STRICT JSON only. No markdown formatting around the JSON.
     ${taskDescription}
-    4. **Formulas:** Do NOT use LaTeX. Use plain text for formulas (e.g., "A = pi * r^2"). Ensure they are clear and readable.
-    5. **Tone:** Academic, technical, and formal.
+    4. **Formatting:** Do NOT use markdown (like **bold** or *italics*). Do NOT use asterisks (*) for emphasis or bullet points (the system handles bullets). Provide clean, plain text only.
+    5. **Conciseness:** Keep bullet points concise to avoid overflowing slides. Each point should be a maximum of 2 lines.
+    6. **Formulas:** Do NOT use LaTeX. Use plain text for formulas (e.g., "A = pi * r^2"). Ensure they are clear and readable.
+    7. **Tone:** Academic, technical, and formal.
     
     **JSON Structure:**
     {

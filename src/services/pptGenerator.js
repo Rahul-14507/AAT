@@ -77,12 +77,33 @@ export const generatePPT = async (
       color: "333333",
     });
 
+    // Topic Slide
+    let topicSlide = pptx.addSlide({ masterName: "MASTER_INTRO" });
+    topicSlide.addShape(pptx.ShapeType.rect, {
+      x: 0,
+      y: 2.5,
+      w: "100%",
+      h: 4,
+      fill: "FFFFFF",
+      line: { color: "FFFFFF" },
+    });
+
+    topicSlide.addText(`Topic: ${problem}`, {
+      x: 1,
+      y: 3.5,
+      w: "85%",
+      fontSize: 28,
+      color: "003366",
+      bold: true,
+      align: "center",
+    });
+
     // Content Slides
     slidesData.forEach((s) => {
       let slide = pptx.addSlide({ masterName: "MASTER_CONTENT" });
 
       // Title
-      slide.addText(s.title, {
+      slide.addText(s.title.replace(/\*/g, ""), {
         x: 0.5,
         y: 0.5,
         w: "90%",
@@ -92,13 +113,13 @@ export const generatePPT = async (
         color: "003366",
         breakLine: false,
       });
-
+ 
       // Bullets
       const bulletPoints = s.content.map((line) => ({
-        text: line,
+        text: line.replace(/\*/g, ""),
         options: { bullet: true },
       }));
-
+ 
       slide.addText(bulletPoints, {
         x: 0.5,
         y: 1.3,
@@ -106,7 +127,7 @@ export const generatePPT = async (
         h: 5.5,
         fontSize: 16,
         color: "333333",
-        lineSpacing: 28,
+        lineSpacing: 24, // Reduced from 28 to prevent overflow
         valign: "top",
       });
     });

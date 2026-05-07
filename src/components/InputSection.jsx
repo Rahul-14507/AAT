@@ -26,6 +26,8 @@ const InputSection = ({
   setGenerateSlides,
   generateReport,
   setGenerateReport,
+  slideCount,
+  setSlideCount,
   loading,
   onGenerate,
   error,
@@ -175,6 +177,55 @@ const InputSection = ({
           </span>
         </label>
       </div>
+
+      {generateSlides && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          className="mt-6"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <label className={`${labelClasses} !mb-0`}>Number of Slides</label>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-bold ${
+                darkMode
+                  ? "bg-indigo-900/50 text-indigo-300"
+                  : "bg-indigo-50 text-indigo-700"
+              }`}
+            >
+              {slideCount} Slides
+            </span>
+          </div>
+          <div className="relative flex items-center group">
+            <input
+              type="range"
+              min="5"
+              max="30"
+              value={slideCount}
+              onChange={(e) => setSlideCount(parseInt(e.target.value))}
+              className={`w-full h-2 rounded-lg appearance-none cursor-pointer accent-indigo-600 ${
+                darkMode ? "bg-slate-700" : "bg-slate-200"
+              }`}
+            />
+            <div className="flex justify-between w-full absolute -bottom-6 px-1 text-[10px] font-medium">
+              <span className={darkMode ? "text-slate-500" : "text-slate-400"}>
+                5
+              </span>
+              <span
+                className={`absolute left-[40%] -translate-x-1/2 ${
+                  darkMode ? "text-slate-500" : "text-slate-400"
+                }`}
+              >
+                15
+              </span>
+              <span className={darkMode ? "text-slate-500" : "text-slate-400"}>
+                30
+              </span>
+            </div>
+          </div>
+          <div className="mt-8"></div>
+        </motion.div>
+      )}
 
       {error && (
         <motion.div

@@ -15,6 +15,7 @@ function App() {
   const [department, setDepartment] = useState("");
   const [generateSlides, setGenerateSlides] = useState(true);
   const [generateReport, setGenerateReport] = useState(true);
+  const [slideCount, setSlideCount] = useState(20);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("");
   const [generatedData, setGeneratedData] = useState(null);
@@ -58,6 +59,7 @@ function App() {
         problem,
         generateSlides,
         generateReport,
+        slideCount,
       );
 
       setProgress("Structuring slides and report...");
@@ -181,6 +183,8 @@ function App() {
           setGenerateSlides={setGenerateSlides}
           generateReport={generateReport}
           setGenerateReport={setGenerateReport}
+          slideCount={slideCount}
+          setSlideCount={setSlideCount}
           loading={loading}
           onGenerate={handleGenerate}
           error={error}
