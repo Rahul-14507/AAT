@@ -16,7 +16,7 @@ function App() {
   const [studentId, setStudentId] = useState("");
   const [department, setDepartment] = useState("");
   const [generateSlides, setGenerateSlides] = useState(true);
-  const [generateReport, setGenerateReport] = useState(true);
+  const [generateReport, setGenerateReport] = useState(false);
   const [slideCount, setSlideCount] = useState(20);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("");
