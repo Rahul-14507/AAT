@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { GraduationCap, Sparkles } from "lucide-react";
+import { GraduationCap, Zap, BookOpenCheck, Shield } from "lucide-react";
 import InputSection from "./components/InputSection";
 import ResultsSection from "./components/ResultsSection";
 import ThemeToggle from "./components/ThemeToggle";
+import PaletteSelector from "./components/PaletteSelector";
+import { THEME_PALETTES } from "./utils/themePresets";
 import { callGroq } from "./services/groq";
 import { generatePPT, generateWordDoc } from "./services/pptGenerator";
 
@@ -20,9 +22,16 @@ function App() {
   const [progress, setProgress] = useState("");
   const [generatedData, setGeneratedData] = useState(null);
   const [error, setError] = useState("");
+  
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("darkMode");
-    return saved ? JSON.parse(saved) : false;
+    return saved ? JSON.parse(saved) : true;
+  });
+
+  const [palette, setPalette] = useState(() => {
+    const savedPaletteId = localStorage.getItem("themePaletteId");
+    const found = THEME_PALETTES.find((p) => p.id === savedPaletteId);
+    return found || THEME_PALETTES[0];
   });
 
   useEffect(() => {
@@ -33,6 +42,11 @@ function App() {
       document.documentElement.classList.remove("dark");
     }
   }, [darkMode]);
+
+  const handleSelectPalette = (newPalette) => {
+    setPalette(newPalette);
+    localStorage.setItem("themePaletteId", newPalette.id);
+  };
 
   const toggleTheme = () => setDarkMode(!darkMode);
 
@@ -49,10 +63,10 @@ function App() {
     setLoading(true);
     setError("");
     setGeneratedData(null);
-    setProgress("Initializing AI research agent...");
+    setProgress("Initializing Groq inference engine...");
 
     try {
-      setProgress("Analyzing problem statement & researching on Groq...");
+      setProgress("Analyzing problem statement & structuring technical concepts...");
       const data = await callGroq(
         apiKey,
         subject,
@@ -62,11 +76,11 @@ function App() {
         slideCount,
       );
 
-      setProgress("Structuring slides and report...");
+      setProgress("Finalizing presentation slides & report schema...");
       setGeneratedData(data);
     } catch (err) {
       setError(
-        err.message || "Failed to generate content. Please check your API key.",
+        err.message || "Failed to generate content. Please check your API key and connection.",
       );
     } finally {
       setLoading(false);
@@ -98,80 +112,107 @@ function App() {
     generateWordDoc(subject, problem, generatedData.report);
   };
 
+  const currentAccent = darkMode ? palette.accentDark : palette.accentLight;
+  const currentBadge = darkMode ? palette.badgeDark : palette.badgeLight;
+
   return (
     <div
-      className={`min-h-screen pb-20 transition-colors duration-300 ${
-        darkMode ? "bg-slate-900" : "bg-slate-50"
+      className={`min-h-screen transition-colors duration-200 bg-grid-pattern ${
+        darkMode ? "bg-[#09090b] text-zinc-100" : "bg-[#fafafa] text-zinc-900"
       }`}
     >
-      {/* Header */}
+      {/* Navigation Header */}
       <header
-        className={`border-b sticky top-0 z-10 backdrop-blur-md transition-colors duration-300 ${
+        className={`border-b sticky top-0 z-30 backdrop-blur-md transition-colors duration-200 ${
           darkMode
-            ? "bg-slate-900/80 border-slate-700"
-            : "bg-white/80 border-slate-200"
+            ? "bg-[#09090b]/85 border-zinc-800/80"
+            : "bg-white/85 border-zinc-200/80"
         }`}
       >
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
-            <div className="bg-indigo-600 p-2 rounded-lg text-white">
-              <GraduationCap className="w-6 h-6" />
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-xs transition-colors duration-200"
+              style={{ backgroundColor: palette.primaryHex }}
+            >
+              <GraduationCap className="w-5 h-5" />
             </div>
             <div>
-              <h1
-                className={`text-xl font-bold leading-none ${
-                  darkMode ? "text-white" : "text-slate-900"
-                }`}
-              >
-                AAT Automator
-              </h1>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm tracking-tight text-zinc-900 dark:text-zinc-100">
+                  AAT Automator
+                </span>
+                <span
+                  className={`text-[10px] font-mono font-medium px-1.5 py-0.2 rounded-md border ${currentBadge}`}
+                >
+                  v2.0
+                </span>
+              </div>
               <p
-                className={`text-xs font-medium mt-1 ${
-                  darkMode ? "text-slate-400" : "text-slate-500"
+                className={`text-[11px] font-medium leading-none mt-0.5 ${
+                  darkMode ? "text-zinc-400" : "text-zinc-500"
                 }`}
               >
-                AI-Powered Assignment Assistant
+                Academic Assessment & Presentation Engine
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Palette Switcher */}
+            <PaletteSelector
+              currentPalette={palette}
+              onSelectPalette={handleSelectPalette}
+              darkMode={darkMode}
+            />
+
             <div
-              className={`hidden md:flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border ${
+              className={`hidden lg:inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg border ${
                 darkMode
-                  ? "bg-indigo-900/50 text-indigo-300 border-indigo-700"
-                  : "bg-indigo-50 text-indigo-700 border-indigo-100"
+                  ? "bg-zinc-900 border-zinc-800 text-zinc-300"
+                  : "bg-zinc-100 border-zinc-200 text-zinc-700"
               }`}
             >
-              <Sparkles className="w-3 h-3" />
-              20 Marks Guaranteed*
+              <Zap
+                className="w-3.5 h-3.5"
+                style={{ color: palette.primaryHex }}
+              />
+              <span>Groq LPU Acceleration</span>
             </div>
+
             <ThemeToggle darkMode={darkMode} onToggle={toggleTheme} />
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto mt-12 px-4">
-        <div className="text-center mb-10">
-          <h2
-            className={`text-4xl font-extrabold mb-4 tracking-tight ${
-              darkMode ? "text-white" : "text-slate-900"
+      {/* Main Content Area */}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 pb-20 space-y-10">
+        {/* Hero Section */}
+        <div className="text-center space-y-3 pt-2">
+          <div
+            className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border ${currentBadge}`}
+          >
+            <BookOpenCheck className="w-3.5 h-3.5" />
+            <span>Structured Academic Coursework Generator</span>
+          </div>
+          <h1
+            className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
+              darkMode ? "text-zinc-50" : "text-zinc-900"
             }`}
           >
-            Automate Your{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">
-              Assignments
-            </span>
-          </h2>
+            Generate University Presentations & Reports
+          </h1>
           <p
-            className={`text-lg max-w-2xl mx-auto ${
-              darkMode ? "text-slate-400" : "text-slate-600"
+            className={`text-sm sm:text-base max-w-xl mx-auto leading-relaxed ${
+              darkMode ? "text-zinc-400" : "text-zinc-600"
             }`}
           >
-            Generate professional slides and comprehensive reports in seconds
-            using advanced AI. Focus on learning, not formatting.
+            Transform problem statements into formatted 16:9 slide decks and
+            structured technical reports with deep academic rigor.
           </p>
         </div>
 
+        {/* Input Configuration Section */}
         <InputSection
           apiKey={apiKey}
           setApiKey={setApiKey}
@@ -196,26 +237,35 @@ function App() {
           error={error}
           progress={progress}
           darkMode={darkMode}
+          palette={palette}
         />
 
+        {/* Results / Preview Section */}
         <ResultsSection
           generatedData={generatedData}
           onDownloadPPT={handleDownloadPPT}
           onDownloadWord={handleDownloadWord}
           darkMode={darkMode}
+          palette={palette}
         />
       </main>
 
+      {/* Minimal Footer */}
       <footer
-        className={`max-w-6xl mx-auto mt-20 px-4 text-center text-sm pb-8 ${
-          darkMode ? "text-slate-500" : "text-slate-400"
+        className={`border-t py-8 text-center text-xs transition-colors duration-200 ${
+          darkMode
+            ? "border-zinc-800/80 text-zinc-500"
+            : "border-zinc-200 text-zinc-400"
         }`}
       >
-        <p>© {new Date().getFullYear()} AAT Automator. Built for students.</p>
-        <p className="mt-2 text-xs">
-          Disclaimer: Use this tool to assist your learning. Always review the
-          generated content for accuracy.
-        </p>
+        <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p>© {new Date().getFullYear()} AAT Automator. Built for engineering students.</p>
+          <div className="flex items-center gap-4 text-[11px]">
+            <span>Powered by Groq</span>
+            <span>•</span>
+            <span>Local Browser Processing</span>
+          </div>
+        </div>
       </footer>
     </div>
   );
