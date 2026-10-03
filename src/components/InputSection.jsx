@@ -56,12 +56,12 @@ const InputSection = ({
         <div className="col-span-1 md:col-span-2">
           <label className={`${labelClasses} flex items-center gap-2`}>
             <Key className="w-4 h-4 text-indigo-500" />
-            Gemini API Key
+            Groq API Key
           </label>
           <input
             type="password"
             className={inputClasses}
-            placeholder="Paste your API key here (starts with AIza...)"
+            placeholder="Paste your Groq API key here (starts with gsk_...)"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
           />
@@ -70,14 +70,14 @@ const InputSection = ({
               darkMode ? "text-slate-400" : "text-slate-500"
             }`}
           >
-            Your key is used locally and never saved. Get one at{" "}
+            Your key is used locally and never saved. Get one for free at{" "}
             <a
-              href="https://aistudio.google.com/app/apikey"
+              href="https://console.groq.com/keys"
               target="_blank"
               rel="noopener noreferrer"
               className="text-indigo-500 hover:text-indigo-400 font-medium hover:underline"
             >
-              Google AI Studio
+              Groq Cloud Console
             </a>
             .
           </p>

@@ -4,7 +4,8 @@ export const generatePPT = async (
   subject,
   problem,
   slidesData,
-  studentDetails
+  studentDetails,
+  totalSlideCount = 20,
 ) => {
   try {
     const pptx = new PptxGenJS();
@@ -24,23 +25,20 @@ export const generatePPT = async (
       background: { path: "/templates/content_template.png" },
     });
 
-    // Title Slide
+    // 1. Title Slide
     let slide = pptx.addSlide({ masterName: "MASTER_INTRO" });
 
     // Overlay white box to cover existing text on template if needed
-    // Assuming the template has text we want to overwrite
-    // Coordinates based on visual estimation of the provided image
     slide.addShape(pptx.ShapeType.rect, {
       x: 0,
       y: 2.5,
       w: "100%",
       h: 4,
       fill: "FFFFFF",
-      line: { color: "FFFFFF" }, // Masking the middle area
+      line: { color: "FFFFFF" },
     });
 
     // Add Text Fields
-    // Course Title
     slide.addText(`Course Title: ${subject}`, {
       x: 1.5,
       y: 2.8,
@@ -50,7 +48,6 @@ export const generatePPT = async (
       bold: true,
     });
 
-    // Presenter Name
     slide.addText(`Presenter's Name : ${studentDetails?.name || ""}`, {
       x: 1.5,
       y: 3.5,
@@ -59,7 +56,6 @@ export const generatePPT = async (
       color: "333333",
     });
 
-    // Presenter ID
     slide.addText(`Presenters ID: ${studentDetails?.id || ""}`, {
       x: 1.5,
       y: 4.2,
@@ -68,7 +64,6 @@ export const generatePPT = async (
       color: "333333",
     });
 
-    // Department
     slide.addText(`Department Name : ${studentDetails?.dept || ""}`, {
       x: 1.5,
       y: 4.9,
@@ -77,7 +72,7 @@ export const generatePPT = async (
       color: "333333",
     });
 
-    // Topic Slide
+    // 2. Topic Slide
     let topicSlide = pptx.addSlide({ masterName: "MASTER_INTRO" });
     topicSlide.addShape(pptx.ShapeType.rect, {
       x: 0,
@@ -98,41 +93,81 @@ export const generatePPT = async (
       align: "center",
     });
 
-    // Content Slides
-    slidesData.forEach((s) => {
+    // 3. Content Slides (strictly limited to totalSlideCount - 3 special slides)
+    const targetContentCount = totalSlideCount
+      ? Math.max(1, totalSlideCount - 3)
+      : (slidesData?.length || 17);
+    const contentSlides = (slidesData || []).slice(0, targetContentCount);
+
+    contentSlides.forEach((s) => {
       let slide = pptx.addSlide({ masterName: "MASTER_CONTENT" });
 
-      // Title
+      // Slide Title
       slide.addText(s.title.replace(/\*/g, ""), {
-        x: 0.5,
-        y: 0.5,
-        w: "90%",
-        h: 0.8,
-        fontSize: 24,
+        x: 0.6,
+        y: 0.45,
+        w: "88%",
+        h: 0.65,
+        fontSize: 22,
         bold: true,
         color: "003366",
         breakLine: false,
       });
- 
-      // Bullets
-      const bulletPoints = s.content.map((line) => ({
-        text: line.replace(/\*/g, ""),
-        options: { bullet: true },
-      }));
- 
-      slide.addText(bulletPoints, {
-        x: 0.5,
-        y: 1.3,
-        w: "90%",
-        h: 5.5,
-        fontSize: 16,
-        color: "333333",
-        lineSpacing: 24, // Reduced from 28 to prevent overflow
+
+      // Rich Bullet formatting with bold topic headings
+      const bulletParagraphs = [];
+      (s.content || []).forEach((line) => {
+        const cleanText = line.replace(/\*/g, "").trim();
+        const colonIdx = cleanText.indexOf(":");
+
+        if (colonIdx > 0 && colonIdx < 45) {
+          const heading = cleanText.substring(0, colonIdx + 1);
+          const body = cleanText.substring(colonIdx + 1);
+          bulletParagraphs.push(
+            {
+              text: heading + " ",
+              options: {
+                bold: true,
+                color: "003366",
+                bullet: true,
+                fontSize: 14.5,
+              },
+            },
+            {
+              text: body,
+              options: {
+                bold: false,
+                color: "222222",
+                paraSpaceAfter: 6,
+                lineSpacingMultiple: 1.12,
+                fontSize: 14.5,
+              },
+            },
+          );
+        } else {
+          bulletParagraphs.push({
+            text: cleanText,
+            options: {
+              bullet: true,
+              color: "222222",
+              paraSpaceAfter: 6,
+              lineSpacingMultiple: 1.12,
+              fontSize: 14.5,
+            },
+          });
+        }
+      });
+
+      slide.addText(bulletParagraphs, {
+        x: 0.6,
+        y: 1.25,
+        w: "88%",
+        h: 4.0,
         valign: "top",
       });
     });
 
-    // Thank You Slide
+    // 4. Thank You Slide (the final slide)
     let thankYouSlide = pptx.addSlide({ masterName: "MASTER_INTRO" });
 
     // Overlay white box

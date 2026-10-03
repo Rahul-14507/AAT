@@ -3,7 +3,7 @@ import { GraduationCap, Sparkles } from "lucide-react";
 import InputSection from "./components/InputSection";
 import ResultsSection from "./components/ResultsSection";
 import ThemeToggle from "./components/ThemeToggle";
-import { callGemini } from "./services/gemini";
+import { callGroq } from "./services/groq";
 import { generatePPT, generateWordDoc } from "./services/pptGenerator";
 
 function App() {
@@ -38,7 +38,7 @@ function App() {
 
   const handleGenerate = async () => {
     if (!apiKey) {
-      setError("Please enter your Gemini API Key.");
+      setError("Please enter your Groq API Key.");
       return;
     }
     if (!subject || !problem) {
@@ -52,8 +52,8 @@ function App() {
     setProgress("Initializing AI research agent...");
 
     try {
-      setProgress("Analyzing problem statement & researching...");
-      const data = await callGemini(
+      setProgress("Analyzing problem statement & researching on Groq...");
+      const data = await callGroq(
         apiKey,
         subject,
         problem,
@@ -77,11 +77,17 @@ function App() {
   const handleDownloadPPT = async () => {
     if (!generatedData) return;
     try {
-      await generatePPT(subject, problem, generatedData.slides, {
-        name: studentName,
-        id: studentId,
-        dept: department,
-      });
+      await generatePPT(
+        subject,
+        problem,
+        generatedData.slides,
+        {
+          name: studentName,
+          id: studentId,
+          dept: department,
+        },
+        slideCount,
+      );
     } catch (err) {
       alert("Failed to generate PPT: " + err.message);
     }

@@ -1,10 +1,10 @@
 # AAT Automator
 
-AI-Powered Assignment Assistant that generates professional slides and comprehensive reports using Google's Gemini AI.
+AI-Powered Assignment Assistant that generates professional slides and comprehensive reports using Groq's ultra-fast LPU inference (Llama 3.3 70B & Llama 3.1 8B).
 
 ## Features
 
-- **Slide Generation**: Creates 20 professional PowerPoint slides with detailed bullet points
+- **Slide Generation**: Creates professional PowerPoint slides with detailed bullet points
 - **Report Generation**: Generates comprehensive academic reports in Word format
 - **Thank You Slide**: Automatic thank you slide with student details
 - **Dark/Light Theme**: Toggle between dark and light modes
@@ -43,7 +43,7 @@ npm run dev
 
 ## Usage
 
-1. Get a Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+1. Get a free Groq API key from [Groq Cloud Console](https://console.groq.com/keys)
 2. Enter your API key, subject, and problem statement
 3. Fill in your student details (optional, for PPT)
 4. Select what to generate (Slides, Report, or both)
